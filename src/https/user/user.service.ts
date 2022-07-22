@@ -147,14 +147,14 @@ export class UserService {
     async uploadAvatar(avatar: string, user: any) {
         try {
             const userExist = await this.userRepository.findOne({
-                where: {id: user.id}
+                where: {id: user}
             });
 
             if(!userExist) {
                 throw new Error('User not found');
             }
 
-            await this.userRepository.update({id: user.id}, {avatar: avatar});
+            await this.userRepository.update({id: user}, {avatar: avatar});
 
             return {
                 success: true,
@@ -174,5 +174,30 @@ export class UserService {
             await this.serviceService.findOne(String(item)).then(res => services.push(res.data));
         }
         return services;
+    }
+
+    async delete(id: string) {
+        try {
+            const user = await this.userRepository.findOne({
+                where: {id}
+            })
+
+            if(!user) {
+                throw new Error('User not found.');
+            }
+
+            await this.userRepository.delete({id});
+
+            return {
+                success: true,
+                message: 'Usuário deletado com sucesso.'
+            }
+
+        } catch (error) {
+            return {
+                success: true,
+                message: error.message
+            }
+        }
     }
 }

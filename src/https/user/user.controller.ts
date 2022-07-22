@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Put, Query, Req, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Put, Query, Req, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
 import { Roles } from "src/auth/decorators/roles.decorator";
@@ -35,10 +35,10 @@ export class UserController {
         }),
         fileFilter: imageFileFilter,
     }))
-    @Post('upload-avatar')
-    async uploadAvatar(@UploadedFile() file: Express.Multer.File, @Req() req: any) {
+    @Post('upload-avatar/:id')
+    async uploadAvatar(@UploadedFile() file: Express.Multer.File, @Param('id', ParseUUIDPipe) id: string) {
         const avatar = await compressImage(file);
-        return this.service.uploadAvatar(avatar, req.user);
+        return this.service.uploadAvatar(avatar, id);
     }
 
 
@@ -57,5 +57,12 @@ export class UserController {
     @Put(':id')
     update(@Param('id', ParseUUIDPipe) id: string, @Body() body: User) {
         return this.service.update(id, body);
+    }
+
+    @Roles(Role.Admin)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Delete(':id')
+    delete(@Param('id', ParseUUIDPipe) id: string) {
+        return this.service.delete(id);
     }
 }
